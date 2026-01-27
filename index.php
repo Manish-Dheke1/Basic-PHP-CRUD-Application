@@ -1,4 +1,8 @@
 <?php 
+// INSERT INTO `notes` (`sno`, `title`, `description`, `tstamp`) VALUES (NULL, 'Buy Books', 'Please books from stationary', current_timestamp());
+
+$insert = false;
+
 // Connect to Database
 mysqli_report(MYSQLI_REPORT_OFF);
 
@@ -14,10 +18,24 @@ $conn = mysqli_connect($servername, $username, $password, $database);
 if (!$conn){
     die("Sorry we failed to connect:". mysqli_connect_error());
 }
-else{
-    echo "Connection was successful<br>";
-}
 
+if($_SERVER['REQUEST_METHOD'] == "POST"){
+    $title = $_POST['title'];
+    $description = $_POST['description'];
+
+// Sql query to be executed    
+$sql = "INSERT INTO `notes` (`title`, `description`) VALUES ('$title', '$description')";
+$result = mysqli_query($conn, $sql);
+
+    // Add a new note table in database
+    if($result){
+        // echo "The record has been inserted successfully successfully<br>";
+        $insert = true;
+    }
+    else{
+        echo "The record was not inserted successfully because of this error ---> ". mysqli_error($conn);
+    }
+}
 ?>
 
 <!doctype html>
@@ -51,20 +69,6 @@ else{
               <a class="nav-link" href="#">Contact Us</a>
             </li>
 
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Dropdown
-              </a>
-              <ul class="dropdown-menu">
-                <li><a class="dropdown-item" href="#">Action</a></li>
-                <li><a class="dropdown-item" href="#">Another action</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item" href="#">Something else here</a></li>
-              </ul>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link disabled">Disabled</a>
-            </li>
           </ul>
           <form class="d-flex" role="search">
             <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search">
@@ -74,9 +78,17 @@ else{
       </div>
     </nav>
 
+    <?php
+    if($insert){
+      echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
+        <strong>Success!</strong> You note has been inserted successfully
+        <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
+      </div>";
+    }
+    ?>
     <div class="container my-4">
       <h1>Add a Note</h1>
-        <form>
+        <form action="/crud/index.php" method="post">
           <div class="mb-3">
             <label for="title" class="form-label">Note Title</label>
             <input type="text" class="form-control" id="title" name="title" aria-describedby="emailHelp">   
@@ -84,16 +96,40 @@ else{
          
           <div class="mb-3">
             <label for="desc" class="form-label">Note Description</label>
-            <textarea class="form-control" id="desc" name="desc" rows="3"></textarea>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
           </div>
           <button type="submit" class="btn btn-primary">Add Note</button>
         </form>
     </div>
 
     <div class="container">
-      <?php 
-       
-      ?>
+
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">S.No</th>
+            <th scope="col">Title</th>
+            <th scope="col">Description</th>
+            <th scope="col">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <?php 
+        $sql = "SELECT * FROM `notes`";
+        $result = mysqli_query($conn, $sql);
+        while($row = mysqli_fetch_assoc($result)){
+          echo "<tr>
+            <th scope='row'>". $row['sno'] ."</th>
+            <td>". $row['title'] ."</td>
+            <td>". $row['description'] ."</td>
+            <td> Actions </td>
+          </tr>";
+          
+        }
+        ?>
+          
+        </tbody>
+      </table>
     </div>
     <!-- Optional JavaScript; choose one of the two! -->
 
