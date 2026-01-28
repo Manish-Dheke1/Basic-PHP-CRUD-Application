@@ -48,9 +48,56 @@ $result = mysqli_query($conn, $sql);
     <!-- Bootstrap CSS -->
     
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+    <link rel="stylesheet" href="//cdn.datatables.net/2.3.6/css/dataTables.dataTables.min.css">
+    <script
+      src="https://code.jquery.com/jquery-3.7.1.js"
+      integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+      crossorigin="anonymous"></script>
+    
+    
+
     <title>iNotes - Notes taking made easy</title>
+    
+
   </head>
   <body>
+    <!-- Edit modal -->
+    <!-- <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#editModal">
+      Edit Modal
+    </button> -->
+
+    <!-- Edit Modal -->
+    <div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h1 class="modal-title fs-5" id="editModalLabel">Edit this Note</h1>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body">
+            
+              <form action="/crud/index.php" method="POST">
+                <div class="mb-3">
+                  <label for="title" class="form-label">Note Title</label>
+                  <input type="text" class="form-control" id="titleEdit" name="titleEdit" aria-describedby="emailHelp">   
+                </div>
+              
+                <div class="mb-3">
+                  <label for="desc" class="form-label">Note Description</label>
+                  <textarea class="form-control" id="descriptionEdit" name="descriptionEdit" rows="3"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Update Note</button>
+              </form>
+
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            <button type="button" class="btn btn-primary">Save changes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container-fluid">
         <a class="navbar-brand" href="#">iNotes</a>
@@ -81,7 +128,7 @@ $result = mysqli_query($conn, $sql);
     <?php
     if($insert){
       echo "<div class='alert alert-success alert-dismissible fade show' role='alert'>
-        <strong>Success!</strong> You note has been inserted successfully
+        <strong>Success!</strong> Your note has been inserted successfully
         <button type='button' class='btn-close' data-bs-dismiss='alert' aria-label='Close'></button>
       </div>";
     }
@@ -102,9 +149,9 @@ $result = mysqli_query($conn, $sql);
         </form>
     </div>
 
-    <div class="container">
-
-      <table class="table">
+    <div class="container my-4">
+    
+      <table class="table" id="myTable">
         <thead>
           <tr>
             <th scope="col">S.No</th>
@@ -117,25 +164,48 @@ $result = mysqli_query($conn, $sql);
           <?php 
         $sql = "SELECT * FROM `notes`";
         $result = mysqli_query($conn, $sql);
+        $sno = 0;
         while($row = mysqli_fetch_assoc($result)){
+          $sno = $sno +1;
           echo "<tr>
-            <th scope='row'>". $row['sno'] ."</th>
+            <th scope='row'>". $sno ."</th>
             <td>". $row['title'] ."</td>
             <td>". $row['description'] ."</td>
-            <td> Actions </td>
-          </tr>";
-          
+            <td> <button class='edit btn btn-sm btn-primary'>Edit</button> <a href='/del'>Delete</a> </td>
+          </tr>";   
         }
         ?>
           
         </tbody>
       </table>
     </div>
+    <hr>
     <!-- Optional JavaScript; choose one of the two! -->
 
     <!-- Option 1: Bootstrap Bundle with Popper -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
 
+    <script src="//cdn.datatables.net/2.3.6/js/dataTables.min.js"></script>
+    <script>
+      let table = new DataTable('#myTable');
+    </script>
+
+    <script>
+      edits = document.getElementsByClassName('edit');
+      Array.from(edits).forEach((element)=>{
+        element.addEventListener("click", (e)=>{
+          console.log("edit", );
+          tr = e.target.parentNode.parentNode;
+          title = tr.getElementsByTagName("td")[0].innerText;
+          description = tr.getElementsByTagName("td")[1].innerText;
+          console.log(title, description);
+          titleEdit.value = title;
+          descriptionEdit.value = description;
+          $('#editModal').modal('toggle');
+        })
+      })
+    </script>
+    
     <!-- Option 2: Separate Popper and Bootstrap JS -->
     <!--
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
